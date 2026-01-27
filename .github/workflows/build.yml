@@ -14,15 +14,19 @@ jobs:
     runs-on: windows-latest
     
     steps:
+    - name: Support long paths
+      run: git config --global core.longpaths true
+
     - name: Checkout code
       uses: actions/checkout@v4
       with:
         submodules: 'recursive'
         fetch-depth: 0
 
-    - name: Force recursive submodule update
+    - name: Force Sync and Update Submodules
       run: |
-        git submodule update --init --recursive
+        git submodule sync --recursive
+        git submodule update --init --recursive --force
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
