@@ -2,7 +2,7 @@
 
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4)](https://dotnet.microsoft.com/)
 [![License](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-Windows%20x64-lightgrey)](https://github.com/yourusername/FModelCLI)
+[![Platform](https://img.shields.io/badge/platform-Windows%20x64-lightgrey)](https://github.com/Herselfta/FModelCLI)
 
 A lightweight command-line wrapper for [FModel](https://github.com/4sval/FModel)'s core extraction capabilities, designed for automated asset extraction from Unreal Engine games.
 
@@ -25,7 +25,7 @@ A lightweight command-line wrapper for [FModel](https://github.com/4sval/FModel)
 
 ### Using Pre-built Binary
 
-1. Download `FModelCLI.exe` from [Releases](https://github.com/yourusername/FModelCLI/releases)
+1. Download `FModelCLI.exe` from [Releases](https://github.com/Herselfta/FModelCLI/releases)
 2. Run the extraction:
 
 ```powershell
@@ -36,7 +36,7 @@ FModelCLI.exe "C:\Game\Paks" "0xYourAESKey" "C:\Output" "ConfigDB"
 
 ```powershell
 # Clone the repository with submodules
-git clone --recursive https://github.com/yourusername/FModelCLI.git
+git clone --recursive https://github.com/Herselfta/FModelCLI.git
 cd FModelCLI
 
 # Run the build script
@@ -128,7 +128,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ### Development Setup
 
 1. Fork the repository
-2. Clone with submodules: `git clone --recursive https://github.com/yourusername/FModelCLI.git`
+2. Clone with submodules: `git clone --recursive https://github.com/Herselfta/FModelCLI.git`
 3. Make your changes in `FModelCLI/Program.cs`
 4. Test with `.\sync_upstream.ps1`
 5. Submit a PR
@@ -166,9 +166,7 @@ This tool is for educational and research purposes only. Please respect game dev
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/FModelCLI/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/FModelCLI/discussions)
+- **Issues**: [GitHub Issues](https://github.com/Herselfta/FModelCLI/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/Herselfta/FModelCLI/discussions)
 
 ---
-
-**Note**: Replace `yourusername` with your actual GitHub username before publishing.
