@@ -23,32 +23,15 @@ jobs:
         submodules: 'recursive'
         fetch-depth: 0
 
-    - name: Force Sync and Update Submodules
-      run: |
-        git submodule sync --recursive
-        git submodule update --init --recursive --force
-
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
-        
-    - name: Restore dependencies
-      run: dotnet restore FModelCLI/FModelCLI.csproj
-      
-    - name: Build
-      run: dotnet build FModelCLI/FModelCLI.csproj -c Release --no-restore
-      
-    - name: Publish
+
+    - name: Build with local script
+      shell: pwsh
       run: |
-        dotnet publish FModelCLI/FModelCLI.csproj `
-          -c Release `
-          -r win-x64 `
-          --self-contained `
-          -p:PublishSingleFile=true `
-          -p:DebugType=None `
-          -p:DebugSymbols=false `
-          -o dist/
+        .\sync_upstream.ps1 -SkipGit
           
     - name: Upload artifact
       uses: actions/upload-artifact@v4

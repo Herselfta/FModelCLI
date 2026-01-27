@@ -1,26 +1,40 @@
-
-# Sync-Upstream.ps1
-# Synchronizes the upstream FModel repository and rebuilds FModelCLI.
+param(
+    [Parameter(Mandatory=$false)]
+    [switch]$Update = $false,   # 用户明确要求更新到最新上游
+    [switch]$SkipGit = $false   # CI 中跳过所有 Git 操作
+)
 
 $ErrorActionPreference = "Stop"
 $ScriptDir = $PSScriptRoot
 $UpstreamDir = Join-Path $ScriptDir "upstream\FModel"
-$RepoUrl = "https://github.com/4sval/FModel.git"
 
-Write-Host "=== FModelCLI Upstream Sync ===" -ForegroundColor Cyan
+Write-Host "=== FModelCLI Build System ===" -ForegroundColor Cyan
 
-# 1. Check if upstream exists
-if (-not (Test-Path $UpstreamDir)) {
-    Write-Host "Clone new upstream from $RepoUrl..."
-    New-Item -ItemType Directory -Path (Split-Path $UpstreamDir) -Force | Out-Null
-    git clone --depth 1 $RepoUrl $UpstreamDir
-} else {
-    Write-Host "Updating existing upstream..."
-    Push-Location $UpstreamDir
-    try {
-        git pull
-    } finally {
-        Pop-Location
+# 1. 智能 Git 逻辑
+if (-not $SkipGit) {
+    # 检查是否在 Git 仓库中
+    $isGitRepo = Test-Path (Join-Path $ScriptDir ".git")
+
+    if ($isGitRepo) {
+        if ($Update) {
+            Write-Host "Updating submodules to latest upstream..." -ForegroundColor Yellow
+            git submodule update --remote --init --recursive
+        } else {
+            # 只有在目录为空时才初始化，避免覆盖用户手动切换的版本
+            $FModelFiles = Get-ChildItem $UpstreamDir -ErrorAction SilentlyContinue
+            if (-not $FModelFiles) {
+                Write-Host "Initializing submodules..."
+                git submodule update --init --recursive
+            } else {
+                Write-Host "Submodule already initialized. Skipping update to preserve current version." -ForegroundColor Gray
+            }
+        }
+    } else {
+        # 如果不是 Git 仓库（比如下载的 Zip 源码），则走原始 Clone 逻辑
+        if (-not (Test-Path $UpstreamDir)) {
+            Write-Host "Not a git repo, cloning upstream..."
+            git clone --depth 1 "https://github.com/4sval/FModel.git" $UpstreamDir
+        }
     }
 }
 
