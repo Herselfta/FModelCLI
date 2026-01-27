@@ -1,0 +1,4 @@
+[submodule "upstream/FModel"]
+	path = upstream/FModel
+	url = https://github.com/4sval/FModel.git
+	branch = master
