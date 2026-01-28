@@ -12,6 +12,9 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.IO.Compression;
 using CUE4Parse.Encryption.Aes;
 using CUE4Parse.FileProvider;
 using CUE4Parse.UE4.Objects.Core.Misc;
@@ -24,7 +27,7 @@ namespace FModelCLI
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             // Initialize Logging
             Log.Logger = new LoggerConfiguration()
@@ -32,16 +35,19 @@ namespace FModelCLI
                 .WriteTo.Console()
                 .CreateLogger();
 
-            // Prepare .data directory for dependencies
-            var dataDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".data");
+            // Prepare .data directory for dependencies (near the EXE)
+            var exePath = Environment.ProcessPath ?? AppContext.BaseDirectory;
+            var dataDir = Path.Combine(Path.GetDirectoryName(exePath)!, ".data");
             Directory.CreateDirectory(dataDir);
-            Console.WriteLine($"[Init] Dependencies directory: {dataDir}");
+            Log.Information("Dependencies directory: {DataDir}", dataDir);
+
+            // Ensure dependencies are downloaded (proxy-friendly)
+            await EnsureDependencies(dataDir);
 
             // Initialize Oodle
-            var oodlePath = Path.Combine(dataDir, OodleHelper.OODLE_DLL_NAME); 
+            var oodlePath = Path.Combine(dataDir, OodleHelper.OODLE_DLL_NAME);
             try
             {
-                // OodleHelper.Initialize handles download if missing, provided we pass the path
                 OodleHelper.Initialize(oodlePath);
                 if (OodleHelper.Instance != null)
                     Log.Information("Oodle initialized successfully.");
@@ -57,11 +63,6 @@ namespace FModelCLI
             var zlibPath = Path.Combine(dataDir, ZlibHelper.DLL_NAME);
             try
             {
-                if (!File.Exists(zlibPath))
-                {
-                    Log.Information("Downloading Zlib...");
-                    ZlibHelper.DownloadDll(zlibPath);
-                }
                 ZlibHelper.Initialize(zlibPath);
                 if (ZlibHelper.Instance != null)
                     Log.Information("Zlib initialized successfully.");
@@ -168,6 +169,7 @@ namespace FModelCLI
 
             foreach (var file in provider.Files)
             {
+                totalChecked++;
                 if (!string.IsNullOrEmpty(filter) && !file.Key.ToLower().Contains(filter))
                     continue;
 
@@ -203,7 +205,74 @@ namespace FModelCLI
                 }
             }
 
-            Console.WriteLine($"[Done] {(listOnly ? "Listed" : "Extracted")} {successCount} files.");
+            Console.WriteLine($"[Done] {(listOnly ? "Listed" : "Extracted")} {successCount} files (Scanned {totalChecked}).");
+        }
+
+        private static async Task EnsureDependencies(string dataDir)
+        {
+            using var client = new HttpClient();
+            client.DefaultRequestHeaders.Add("User-Agent", "FModelCLI/1.0.0");
+
+            // Oodle
+            var oodlePath = Path.Combine(dataDir, OodleHelper.OODLE_DLL_NAME);
+            if (!File.Exists(oodlePath))
+            {
+                Log.Information("Downloading Oodle (proxy-friendly)...");
+                const string oodleUrl = "https://github.com/WorkingRobot/OodleUE/releases/download/2026-01-25-1223/clang-cl-x64-release.zip";
+                var zipPath = Path.Combine(dataDir, "oodle.zip");
+                await DownloadFileAsync(client, oodleUrl, zipPath);
+                
+                Log.Information("Extracting Oodle...");
+                using (var zip = ZipFile.OpenRead(zipPath))
+                {
+                    var entry = zip.GetEntry("bin/oodle-data-shared.dll");
+                    if (entry != null)
+                    {
+                        entry.ExtractToFile(oodlePath, true);
+                    }
+                }
+                File.Delete(zipPath);
+            }
+
+            // Zlib
+            var zlibPath = Path.Combine(dataDir, ZlibHelper.DLL_NAME);
+            if (!File.Exists(zlibPath))
+            {
+                Log.Information("Downloading Zlib (proxy-friendly)...");
+                var gzPath = Path.Combine(dataDir, "zlib.gz");
+                await DownloadFileAsync(client, ZlibHelper.DOWNLOAD_URL, gzPath);
+                
+                Log.Information("Extracting Zlib...");
+                using (var fs = File.OpenRead(gzPath))
+                using (var gz = new GZipStream(fs, CompressionMode.Decompress))
+                using (var outFs = File.Create(zlibPath))
+                {
+                    await gz.CopyToAsync(outFs);
+                }
+                File.Delete(gzPath);
+            }
+
+            // VgmStream (Audio)
+            var vgmCheckPath = Path.Combine(dataDir, "vgmstream-cli.exe");
+            if (!File.Exists(vgmCheckPath))
+            {
+                Log.Information("Downloading VgmStream (proxy-friendly)...");
+                const string vgmUrl = "https://github.com/vgmstream/vgmstream/releases/latest/download/vgmstream-win.zip";
+                var zipPath = Path.Combine(dataDir, "vgmstream.zip");
+                await DownloadFileAsync(client, vgmUrl, zipPath);
+                
+                Log.Information("Extracting VgmStream...");
+                ZipFile.ExtractToDirectory(zipPath, dataDir, true);
+                File.Delete(zipPath);
+            }
+        }
+
+        private static async Task DownloadFileAsync(HttpClient client, string url, string path)
+        {
+            var response = await client.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+            await using var fs = File.Create(path);
+            await response.Content.CopyToAsync(fs);
         }
     }
 }
