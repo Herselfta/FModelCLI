@@ -49,16 +49,20 @@ cd FModelCLI
 
 ```
 FModelCLI.exe <GameDir> <AESKey> <OutputDir> [Filter]
+FModelCLI.exe <GameDir> <AESKey> --list [Filter]
 ```
 
 ### Parameters
 
 | Parameter | Required | Description | Example |
 |-----------|----------|-------------|---------|
-| `GameDir` | ✅ | Path to game's PAK directory | `E:\WutheringWaves\Client\Content\Paks` |
-| `AESKey` | ✅ | AES decryption key(s), comma/semicolon separated | `0x1234...ABCD` or `key1;key2` |
-| `OutputDir` | ✅ | Where to save extracted files | `E:\Extracted` |
-| `Filter` | ❌ | Optional keyword to filter files (case-insensitive) | `ConfigDB`, `TextMap`, `Audio` |
+| `GameDir` | ✅ | Path to game's root directory or PAK directory | `E:\WutheringWaves\WutheringWaves Game` |
+| `AESKey`  | ✅ | AES decryption key(s), semicolon separated | `0x1234...;0xABCD...` |
+| `OutputDir`| ✅* | Where to save extracted files (N/A in list mode) | `E:\Extracted` |
+| `--list`  | ❌ | Toggle **list mode**: print file paths without extracting | `--list` |
+| `Filter`  | ❌ | Optional keyword to filter files (case-insensitive) | `ConfigDB`, `Audio`, `zh` |
+
+*\* OutputDir is required for extraction but should be replaced by `--list` for list mode.*
 
 ### Examples
 
@@ -77,9 +81,19 @@ FModelCLI.exe "E:\Game\Paks" "0xABCD1234..." "E:\Output" "TextMap"
 FModelCLI.exe "E:\Game\Paks" "0xABCD1234..." "E:\Output"
 ```
 
+**List all files in Chinese language pack:**
+```powershell
+FModelCLI.exe "E:\Game" "0xKEY1;0xKEY2" --list "/zh/"
+```
+
+**Debug all audio files:**
+```powershell
+FModelCLI.exe "E:\Game" "0xKEY1;0xKEY2" --list "WwiseAudio_Generated"
+```
+
 **Multiple AES keys:**
 ```powershell
-FModelCLI.exe "E:\Game\Paks" "0xKEY1;0xKEY2;0xKEY3" "E:\Output" "Audio"
+FModelCLI.exe "E:\Game" "0xKEY1;0xKEY2;0xKEY3" "E:\Output" "Audio"
 ```
 
 ## 🏗️ Project Structure
