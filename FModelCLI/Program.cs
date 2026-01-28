@@ -16,6 +16,9 @@ using CUE4Parse.Encryption.Aes;
 using CUE4Parse.FileProvider;
 using CUE4Parse.UE4.Objects.Core.Misc;
 using CUE4Parse.UE4.Versions;
+using CUE4Parse.Compression;
+using Serilog;
+using CUE4Parse_Conversion.Textures.BC;
 
 namespace FModelCLI
 {
@@ -23,6 +26,70 @@ namespace FModelCLI
     {
         static void Main(string[] args)
         {
+            // Initialize Logging
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .WriteTo.Console()
+                .CreateLogger();
+
+            // Prepare .data directory for dependencies
+            var dataDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".data");
+            Directory.CreateDirectory(dataDir);
+            Console.WriteLine($"[Init] Dependencies directory: {dataDir}");
+
+            // Initialize Oodle
+            var oodlePath = Path.Combine(dataDir, OodleHelper.OODLE_DLL_NAME); 
+            try
+            {
+                // OodleHelper.Initialize handles download if missing, provided we pass the path
+                OodleHelper.Initialize(oodlePath);
+                if (OodleHelper.Instance != null)
+                    Log.Information("Oodle initialized successfully.");
+                else
+                    Log.Warning("Oodle initialization finished but Instance is null.");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to initialize Oodle");
+            }
+
+            // Initialize Zlib
+            var zlibPath = Path.Combine(dataDir, ZlibHelper.DLL_NAME);
+            try
+            {
+                if (!File.Exists(zlibPath))
+                {
+                    Log.Information("Downloading Zlib...");
+                    ZlibHelper.DownloadDll(zlibPath);
+                }
+                ZlibHelper.Initialize(zlibPath);
+                if (ZlibHelper.Instance != null)
+                    Log.Information("Zlib initialized successfully.");
+                else
+                    Log.Warning("Zlib initialization finished but Instance is null.");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to initialize Zlib");
+            }
+
+            // Initialize Detex
+            var detexPath = Path.Combine(dataDir, DetexHelper.DLL_NAME);
+            try
+            {
+                if (!File.Exists(detexPath))
+                {
+                    Log.Information("Extracting Detex...");
+                    DetexHelper.LoadDll(detexPath);
+                }
+                DetexHelper.Initialize(detexPath);
+                Log.Information("Detex initialized successfully.");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to initialize Detex");
+            }
+
             if (args.Length < 2)
             {
                 Console.WriteLine("Usage: FModelCLI <GameDir> <AES> <OutputDir> [Filter]");
