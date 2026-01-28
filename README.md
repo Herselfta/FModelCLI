@@ -15,6 +15,19 @@ A lightweight command-line wrapper for [FModel](https://github.com/4sval/FModel)
 - **🔍 Smart filtering** - Extract only what you need with keyword filters
 - **📦 Self-contained** - All dependencies bundled in one executable
 
+## 🧠 Why FModelCLI?
+
+While `CUE4Parse` is the powerful low-level library that does the heavy lifting, and `FModel` is the industry-standard GUI, **FModelCLI** exists to bridge the gap between "power user" automation and "game-specific" compatibility.
+
+### CUE4Parse vs. FModel Kernel
+- **CUE4Parse**: A raw, high-performance C# library for parsing Unreal assets. It is generic and strictly follows UE standards.
+- **FModel**: Built on `CUE4Parse`, but adds a "Compatibility Layer". It contains specific patches, custom enums (like `EGame.GAME_WutheringWaves`), and serialization fixes for games that deviate from standard Unreal behavior.
+
+### The Rationale
+1. **Headless Automation**: GUI tools are impossible to integrate into automated toolchains (like **Ludiglot**). FModelCLI provides the robust FModel "kernel" in a format that scripts can use.
+2. **The "GUID Gap" Solution**: Many modern games provide AES keys via community tables without the corresponding Internal GUIDs. Raw CUE4Parse implementations often fail to mount these packages because they require a 1:1 GUID-to-Key mapping. FModelCLI implements a **Brute-Force Mounting** logic that attempts every provided key against every encrypted package, ensuring a 100% mount rate for games like *Wuthering Waves*.
+3. **Upstream Synergies**: By using FModel as the upstream instead of raw CUE4Parse, this tool inherits community-driven fixes for new game versions (like UE5 IO Store / Zen Loader support) the moment they are added to FModel.
+
 ## 📋 Prerequisites
 
 - **Windows x64** (for pre-built binaries)
