@@ -122,7 +122,7 @@ FModelCLI/
 │   └── FModelCLI.exe       # Final executable
 ├── sync_upstream.ps1       # Automated build script
 ├── .gitignore              # Git ignore rules
-├── LICENSE                 # MIT License
+├── LICENSE                 # GPL-3.0 License
 └── README.md               # This file
 ```
 

@@ -27,8 +27,27 @@ namespace FModelCLI
 {
     class Program
     {
+        public const string VERSION = "1.0.0";
+
         static async Task Main(string[] args)
         {
+            if (args.Length > 0 && (args[0] == "--version" || args[0] == "-v"))
+            {
+                Console.WriteLine($"FModelCLI v{VERSION}");
+                return;
+            }
+
+            if (args.Length < 2 || (args.Length > 0 && (args[0] == "--help" || args[0] == "-h")))
+            {
+                Console.WriteLine($"FModelCLI v{VERSION} - Command-line wrapper for FModel");
+                Console.WriteLine("Usage: FModelCLI <GameDir> <AES> <OutputDir> [Filter]");
+                Console.WriteLine("       FModelCLI <GameDir> <AES> --list [Filter]  (list files only)");
+                Console.WriteLine("");
+                Console.WriteLine("Options:");
+                Console.WriteLine("  -v, --version    Show version information");
+                Console.WriteLine("  -h, --help       Show this help message");
+                return;
+            }
             // Initialize Logging
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Information()
@@ -89,13 +108,6 @@ namespace FModelCLI
             catch (Exception ex)
             {
                 Log.Error(ex, "Failed to initialize Detex");
-            }
-
-            if (args.Length < 2)
-            {
-                Console.WriteLine("Usage: FModelCLI <GameDir> <AES> <OutputDir> [Filter]");
-                Console.WriteLine("       FModelCLI <GameDir> <AES> --list [Filter]  (list files only)");
-                return;
             }
 
             string gameDir = args[0];

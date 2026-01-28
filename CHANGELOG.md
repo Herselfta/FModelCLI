@@ -38,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Command-line interface for FModel/CUE4Parse
 - Support for Wuthering Waves and other UE4/UE5 games
 - Self-contained .NET 8.0 executable
-- MIT License
+- GPL-3.0 License (required by FModel dependency)
 - GitHub Actions CI/CD pipeline
 
 ---
