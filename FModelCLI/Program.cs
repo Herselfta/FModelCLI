@@ -178,10 +178,28 @@ namespace FModelCLI
 
             int successCount = 0;
             int totalChecked = 0;
+            int skippedDuplicates = 0;
+
+            // CUE4Parse's FileProviderDictionary.GetEnumerator() yields ALL entries
+            // from ALL PAKs (including duplicates) in descending ReadOrder.
+            // Patch PAKs (_P.pak) have higher ReadOrder and appear first.
+            // Without dedup, iterating writes the correct patch version first,
+            // then the base version OVERWRITES it on disk.
+            // Fix: track seen paths and skip duplicates — the first yielded entry
+            // (highest ReadOrder = patch) is authoritative.
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var file in provider.Files)
             {
                 totalChecked++;
+
+                // Deduplicate: first occurrence (highest ReadOrder) wins
+                if (!seen.Add(file.Key))
+                {
+                    skippedDuplicates++;
+                    continue;
+                }
+
                 if (!string.IsNullOrEmpty(filter) && !file.Key.ToLower().Contains(filter))
                     continue;
 
@@ -217,6 +235,8 @@ namespace FModelCLI
                 }
             }
 
+            if (skippedDuplicates > 0)
+                Console.WriteLine($"[Info] Skipped {skippedDuplicates} duplicate entries (patch priority preserved).");
             Console.WriteLine($"[Done] {(listOnly ? "Listed" : "Extracted")} {successCount} files (Scanned {totalChecked}).");
         }
 

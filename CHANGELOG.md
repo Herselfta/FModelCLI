@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Critical: Patch PAK content overwritten by base PAK during export**
+  - `FileProviderDictionary.GetEnumerator()` yields ALL entries from ALL PAKs
+    (including duplicates) in descending `ReadOrder`. Patch PAKs (`_P.pak`,
+    `ReadOrder = base + 100*version`) appear first, but without deduplication
+    the subsequent base entry overwrites the correct patch file on disk.
+  - Added `HashSet<string>` deduplication in the export loop: the first
+    occurrence (highest `ReadOrder` = patch) is authoritative; duplicates are
+    skipped. This ensures `File.WriteAllBytes` is only called once per virtual
+    path with the correct (patch-priority) content.
+  - Affected scenario: Wuthering Waves CN v3.1 — 8,427 ConfigDB entries had
+    empty EN translations in the base PAK; the Resource Patch PAK contained
+    the filled translations but was being overwritten.
+
 ### Added
 - Initial release of FModelCLI
 - Single-file executable for Windows x64
