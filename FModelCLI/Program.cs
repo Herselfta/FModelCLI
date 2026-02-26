@@ -64,7 +64,7 @@ namespace FModelCLI
             await EnsureDependencies(dataDir);
 
             // Initialize Oodle
-            var oodlePath = Path.Combine(dataDir, OodleHelper.OODLE_DLL_NAME);
+            var oodlePath = Path.Combine(dataDir, OodleHelper.OodleFileName);
             try
             {
                 OodleHelper.Initialize(oodlePath);
@@ -246,7 +246,7 @@ namespace FModelCLI
             client.DefaultRequestHeaders.Add("User-Agent", "FModelCLI/1.0.0");
 
             // Oodle
-            var oodlePath = Path.Combine(dataDir, OodleHelper.OODLE_DLL_NAME);
+            var oodlePath = Path.Combine(dataDir, OodleHelper.OodleFileName);
             if (!File.Exists(oodlePath))
             {
                 Log.Information("Downloading Oodle (proxy-friendly)...");
