@@ -7,6 +7,7 @@ param(
 $ErrorActionPreference = "Stop"
 $ScriptDir = $PSScriptRoot
 $UpstreamDir = Join-Path $ScriptDir "upstream\FModel"
+$UpstreamBranch = "dev"
 
 Write-Host "=== FModelCLI Build System ===" -ForegroundColor Cyan
 
@@ -17,7 +18,7 @@ if (-not $SkipGit) {
 
     if ($isGitRepo) {
         if ($Update) {
-            Write-Host "Updating submodules to latest upstream..." -ForegroundColor Yellow
+            Write-Host "Updating submodules to latest upstream ($UpstreamBranch)..." -ForegroundColor Yellow
             git submodule update --remote --init --recursive
         } else {
             # 只有在目录为空时才初始化，避免覆盖用户手动切换的版本
@@ -32,8 +33,8 @@ if (-not $SkipGit) {
     } else {
         # 如果不是 Git 仓库（比如下载的 Zip 源码），则走原始 Clone 逻辑
         if (-not (Test-Path $UpstreamDir)) {
-            Write-Host "Not a git repo, cloning upstream..."
-            git clone --depth 1 "https://github.com/4sval/FModel.git" $UpstreamDir
+            Write-Host "Not a git repo, cloning upstream ($UpstreamBranch)..."
+            git clone --depth 1 --branch $UpstreamBranch "https://github.com/4sval/FModel.git" $UpstreamDir
         }
     }
 }

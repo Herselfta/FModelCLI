@@ -132,7 +132,7 @@ FModelCLI/
 
 The `sync_upstream.ps1` script automates the entire build process:
 
-1. **Clone/Update upstream** - Fetches latest FModel source
+1. **Clone/Update upstream** - Fetches FModel from the configured upstream branch (`dev`)
 2. **Initialize submodules** - Ensures CUE4Parse is available
 3. **Restore dependencies** - Downloads NuGet packages
 4. **Publish release** - Creates self-contained single-file executable
