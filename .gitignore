@@ -53,3 +53,6 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 
+# Temporary artifacts
+keys.txt
+

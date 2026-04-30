@@ -70,7 +70,7 @@ FModelCLI.exe <GameDir> <AESKey> --list [Filter]
 | Parameter | Required | Description | Example |
 |-----------|----------|-------------|---------|
 | `GameDir` | ✅ | Path to game's root directory or PAK directory | `E:\WutheringWaves\WutheringWaves Game` |
-| `AESKey`  | ✅ | AES decryption key(s), semicolon separated | `0x1234...;0xABCD...` |
+| `AESKey`  | ✅ | AES decryption key(s), semicolon/comma separated. Or `@filepath` to read from a text file | `0x1234...;0xABCD...` or `@keys.txt` |
 | `OutputDir`| ✅* | Where to save extracted files (N/A in list mode) | `E:\Extracted` |
 | `--list`  | ❌ | Toggle **list mode**: print file paths without extracting | `--list` |
 | `Filter`  | ❌ | Optional keyword to filter files (case-insensitive) | `ConfigDB`, `Audio`, `zh` |
@@ -82,6 +82,12 @@ FModelCLI.exe <GameDir> <AESKey> --list [Filter]
 **Extract all ConfigDB files:**
 ```powershell
 FModelCLI.exe "E:\Game\Paks" "0xABCD1234..." "E:\Output" "ConfigDB"
+```
+
+**Extract using a file containing keys (bypasses max command line length limits):**
+```powershell
+# Create a keys.txt file with one key per line or semicolon-separated
+FModelCLI.exe "E:\Game\Paks" "@keys.txt" "E:\Output" "ConfigDB"
 ```
 
 **Extract TextMap for localization:**

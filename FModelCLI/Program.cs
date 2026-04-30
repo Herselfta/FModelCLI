@@ -140,7 +140,18 @@ namespace FModelCLI
 
             // Parse keys
             var keys = new List<FAesKey>();
-            var keyParts = aesKey.Replace("\"", "").Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            string keysContent = aesKey;
+            
+            if (aesKey.StartsWith("@") && File.Exists(aesKey.Substring(1)))
+            {
+                keysContent = File.ReadAllText(aesKey.Substring(1));
+            }
+            else if (!aesKey.StartsWith("0x") && File.Exists(aesKey))
+            {
+                keysContent = File.ReadAllText(aesKey);
+            }
+
+            var keyParts = keysContent.Replace("\"", "").Split(new[] { ',', ';', ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var part in keyParts)
             {
                 var dictContent = part.Trim();
@@ -204,8 +215,8 @@ namespace FModelCLI
                     continue;
 
                 // Skip non-essential assets
-                if (file.Key.EndsWith(".uasset") || file.Key.EndsWith(".uexp") || file.Key.EndsWith(".ubulk"))
-                    continue;
+                // if (file.Key.EndsWith(".uasset") || file.Key.EndsWith(".uexp") || file.Key.EndsWith(".ubulk"))
+                //    continue;
 
                 if (listOnly)
                 {
